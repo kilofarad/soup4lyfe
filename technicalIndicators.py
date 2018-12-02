@@ -87,27 +87,9 @@ def create_moving_avg_df(df, col = 'close', short_period = '5', long_period = '5
     return(df)
 
 
-def macd_crossover(df, idx):
-    '''
-
-    :param df:
-    :param idx:
-    :return:
-    '''
-    if idx == 0:
-        return ("No Move")
-    # print(df.head())
-    prev_macd = df.iloc[idx - 1, 10]
-    prev_signal = df.iloc[idx - 1, 11]
-    current_macd = df.iloc[idx, 10]
-    current_signal = df.iloc[idx, 11]
-
-    if prev_signal < prev_macd and current_macd <= current_signal:  # bearish crossover
-        return ("Buy")
-    elif prev_signal > prev_macd and current_macd >= current_signal:  # bullish crossover
-        return ("Sell")
-    else:  # no crossover
-        return ("No Move")
+def get_col_index(df, indicator):
+    cols = list(df)
+    return(cols.index(indicator))
 
 def crossover(df, idx, col1, col2):
     '''
@@ -119,19 +101,37 @@ def crossover(df, idx, col1, col2):
     :return:
     '''
     if idx == 0:
-        return ("No Move")
+        return ("Hold")
 
     prev1 = df.iloc[idx - 1, col1]
     prev2 = df.iloc[idx - 1, col2]
     curr1 = df.iloc[idx, col1]
     curr2 = df.iloc[idx, col2]
 
-    if prev1 < prev2 and curr1 <= curr2: # buy signal
+    if prev1 < prev2 and curr2 <= curr1: # buy signal
         return("Buy")
-    elif prev1 > prev2 and curr1 >= curr2: # sell signal
+    elif prev1 > prev2 and curr2 >= curr1: # sell signal
         return("Sell")
     else:
-        return("No Move")
+        return("Hold")
+
+def bound_crossover(df, idx, col1, col2, lower_bound = 40, upper_bound = 60):
+    if idx == 0:
+        return ("Hold")
+
+    prev1 = df.iloc[idx - 1, col1]
+    prev2 = df.iloc[idx - 1, col2]
+    curr1 = df.iloc[idx, col1]
+    curr2 = df.iloc[idx, col2]
+
+    #print(prev1)
+
+    if prev1 < prev2 and curr2 <= curr1 and prev1 <= lower_bound: # buy signal
+        return("Buy")
+    elif prev1 > prev2 and curr2 >= curr1 and prev1 >= upper_bound: # sell signal
+        return("Sell")
+    else:
+        return("Hold")
 
 
 def rsi_signal(rsi):
@@ -147,12 +147,12 @@ def rsi_signal(rsi):
         elif rsi <= 30:  # Sell signal
             return ("Sell")
         else:
-            return ("No Move")
+            return ("Hold")
     except Exception as e:
         print(e)
-        return ("No Move")
+        return ("Hold")
 
-def remove_rsi_duplicates(df, signal_col):
+def remove_duplicates(df, signal_col):
     '''
 
     :param df:
@@ -160,7 +160,7 @@ def remove_rsi_duplicates(df, signal_col):
     :return:
     '''
     other_df = df.iloc[0:1]
-    print(type(other_df))
+    #print(type(other_df))
     prev_signal = 'Buy'
     for index, row in df.iterrows():
         #print(type(row))
@@ -175,7 +175,7 @@ def remove_rsi_duplicates(df, signal_col):
             other_df = other_df.append(row, ignore_index = True)
     return(other_df)
 
-def filter_signals(df, col, buy = 'Buy', sell = 'Sell'):
+def filter_signals(df, col = 'signal', buy = 'Buy', sell = 'Sell'):
     '''
 
     :param df:
@@ -185,7 +185,25 @@ def filter_signals(df, col, buy = 'Buy', sell = 'Sell'):
     :return:
     '''
     mask = (df[col] == buy) | (df[col] == sell)
-    return(df.loc[mask])
+    df = df.loc[mask]
+    #print(df['signal'].iloc[0])
+    try:
+        x = 0
+        while df['signal'].iloc[x] == 'Sell':
+            #print('skip')
+            x += 1
+        df = df.iloc[x:]
+    except Exception as e:
+        print(e)
+    return(df)
+
+def sharpe_ratio(returns, rrr = 0):
+    ra_rb = abs(returns) - rrr
+    num = np.mean(ra_rb)
+    den = np.std(ra_rb)
+    if den == 0:
+        return 0
+    return num/den
 
 def calc_returns(filtered_df, col = 'close'):
     '''
@@ -198,30 +216,69 @@ def calc_returns(filtered_df, col = 'close'):
     filtered_df = filtered_df.pct_change()
     selected = filtered_df[col].tolist()
     returns_list= []
-    for x in range(0, len(selected), 2):
+    for x in range(1, len(selected), 2):
         returns_list.append(selected[x])
 
     return(returns_list)
 
+def calc_sharpe(filtered_df, col = 'close'):
+    filtered_df = filtered_df[['close', 'open', 'high', 'low']]
+    filtered_df = filtered_df.pct_change()
+    return(sharpe_ratio(filtered_df[col]))
 
-def cumulative_returns(returns_list):
+
+
+def create_crossover_df(df, lin1, lin2):
+    col1 = get_col_index(df, lin1)
+    col2 = get_col_index(df, lin2)
+    c = []
+    for x in range(len(df['timestamp'])):
+        c.append(crossover(df, x, col1, col2))
+    c = pd.Series(c)
+    df = df[['close', 'open', 'high', 'low', lin1, lin2]]
+    df = df.assign(signal=c.values)
+    return(df)
+
+def create_bound_crossover_df(df, lin1, n = 5):
+    col1 = get_col_index(df, lin1)
+    df['MA'] = df[lin1].rolling(window=n).mean()
+    #col2 = 'MA'
+    col2 = get_col_index(df, 'MA')
+    c = []
+    for x in range(len(df['timestamp'])):
+        c.append(bound_crossover(df, x, col1, col2))
+    c = pd.Series(c)
+    df = df[['close', 'open', 'high', 'low', lin1, 'MA']]
+    df = df.assign(signal=c.values)
+    return(df)
+
+
+
+def cumulative_returns(returns_list, output = True):
     '''
 
     :param returns_list:
     :return:
     '''
     trade_sum = sum(returns_list)
-    print('Trade Sum: {}'.format(trade_sum))
-    if trade_sum > 0:
-        print('Positive Return!')
-    elif trade_sum < 0:
-        print('Negative Return!')
-    else:
-        print('No Return!')
+    if output:
+        print('Trade Sum: {}'.format(trade_sum))
+        if trade_sum > 0:
+            print('Positive Return!')
+        elif trade_sum < 0:
+            print('Negative Return!')
+        else:
+            print('No Return!')
 
     return(trade_sum)
 
-def add_obv(df):
-    pass
+def get_returns(df, sig = 'signal', duplicates = False): # more complete implementation
+    df = filter_signals(df, col = sig)
+    #print(df.head())
+    if duplicates:
+        df = remove_duplicates(df, 'signal')
+    return(calc_returns(df))
+
+
 
 
