@@ -187,9 +187,20 @@ def filter_signals(df, col = 'signal', buy = 'Buy', sell = 'Sell'):
     mask = (df[col] == buy) | (df[col] == sell)
     df = df.loc[mask]
     #print(df['signal'].iloc[0])
-    if df['signal'].iloc[0] == 'Sell':
-        df = df.iloc[1:]
+    try:
+        if df['signal'].iloc[0] == 'Sell':
+            df = df.iloc[1:]
+    except:
+        pass
     return(df)
+
+def sharpe_ratio(returns, rrr = 0):
+    ra_rb = abs(returns) - rrr
+    num = np.mean(ra_rb)
+    den = np.std(ra_rb)
+    if den == 0:
+        return 0
+    return num/den
 
 def calc_returns(filtered_df, col = 'close'):
     '''
@@ -207,6 +218,13 @@ def calc_returns(filtered_df, col = 'close'):
 
     return(returns_list)
 
+def calc_sharpe(filtered_df, col = 'close'):
+    filtered_df = filtered_df[['close', 'open', 'high', 'low']]
+    filtered_df = filtered_df.pct_change()
+    return(sharpe_ratio(filtered_df[col]))
+
+
+
 def create_crossover_df(df, lin1, lin2):
     col1 = get_col_index(df, lin1)
     col2 = get_col_index(df, lin2)
@@ -218,9 +236,9 @@ def create_crossover_df(df, lin1, lin2):
     df = df.assign(signal=c.values)
     return(df)
 
-def create_bound_crossover_df(df, lin1, lin2):
+def create_bound_crossover_df(df, lin1, n = 5):
     col1 = get_col_index(df, lin1)
-    df['MA'] = df[lin1].rolling(window=5).mean()
+    df['MA'] = df[lin1].rolling(window=n).mean()
     #col2 = 'MA'
     col2 = get_col_index(df, 'MA')
     c = []
@@ -232,24 +250,24 @@ def create_bound_crossover_df(df, lin1, lin2):
     return(df)
 
 
-def cumulative_returns(returns_list):
+
+def cumulative_returns(returns_list, output = True):
     '''
 
     :param returns_list:
     :return:
     '''
     trade_sum = sum(returns_list)
-    print('Trade Sum: {}'.format(trade_sum))
-    if trade_sum > 0:
-        print('Positive Return!')
-    elif trade_sum < 0:
-        print('Negative Return!')
-    else:
-        print('No Return!')
+    if output:
+        print('Trade Sum: {}'.format(trade_sum))
+        if trade_sum > 0:
+            print('Positive Return!')
+        elif trade_sum < 0:
+            print('Negative Return!')
+        else:
+            print('No Return!')
 
     return(trade_sum)
 
-def add_obv(df):
-    pass
 
 

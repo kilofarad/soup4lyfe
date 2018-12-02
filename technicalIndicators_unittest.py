@@ -206,7 +206,7 @@ class ti_test():
         print('TEST 16 - Create RSI Bound Crossover Dataframe')
         try:
             df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
-            df = ti.create_bound_crossover_df(df, 'rsi_14', 'close_5_ema')
+            df = ti.create_bound_crossover_df(df, 'rsi_14')
             df = ti.filter_signals(df)
             df = ti.remove_duplicates(df, 'signal')
             print(df.head())
@@ -214,6 +214,44 @@ class ti_test():
             cumulative_returns = ti.cumulative_returns(returns_list)
         except Exception as e:
             print(e)
+
+    def test17(self):
+        print('TEST 17 - Brute Force Optimize RSI')
+        #try:
+        df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+        sub_df = df[['close', 'open', 'high', 'low', 'timestamp']]
+            #df = ti.convert2stockstats(df)
+        sub_df = ti.convert2stockstats(sub_df)
+        rsi_win = list(range(3, 50))
+        mv_win = list(range(3,50))
+        max = 0
+        for rs in rsi_win:
+
+            df = ti.create_indicator_df(sub_df, 'rsi_{}'.format(rs))
+            #print(copy_df.head())
+            #break
+            print(rs)
+            for mv in mv_win:
+                #print(rs)
+                copy_df = ti.create_bound_crossover_df(df, 'rsi_{}'.format(rs), mv)
+                copy_df = ti.filter_signals(copy_df)
+                copy_df = ti.remove_duplicates(copy_df, 'signal')
+                #print(df.head())
+                returns_list = ti.calc_returns(copy_df)
+
+                cumulative_returns = ti.cumulative_returns(returns_list, output = False)
+                if cumulative_returns > max:
+                    optim = (rs, mv)
+                    sr = ti.calc_sharpe(copy_df)
+                    max = cumulative_returns
+        print('OPTIM: {}'.format(optim))
+        print('SHARPE RATIO: {}'.format(sr))
+        print('MAX: {}'.format(max))
+
+
+
+        #except Exception as e:
+         #   print('ERROR: {}'.format(e))
 
 
 
@@ -234,7 +272,9 @@ if __name__ == '__main__':
     #x.test13()
     #x.test14()
     #x.test15()
-    x.test16()
+    #x.test16()
+    x.test17()
+    #x.test18()
 
     print('TESTS COMPLETE!')
 
