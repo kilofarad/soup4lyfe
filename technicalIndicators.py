@@ -188,10 +188,13 @@ def filter_signals(df, col = 'signal', buy = 'Buy', sell = 'Sell'):
     df = df.loc[mask]
     #print(df['signal'].iloc[0])
     try:
-        if df['signal'].iloc[0] == 'Sell':
-            df = df.iloc[1:]
-    except:
-        pass
+        x = 0
+        while df['signal'].iloc[x] == 'Sell':
+            #print('skip')
+            x += 1
+        df = df.iloc[x:]
+    except Exception as e:
+        print(e)
     return(df)
 
 def sharpe_ratio(returns, rrr = 0):
