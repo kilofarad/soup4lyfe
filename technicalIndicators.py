@@ -205,16 +205,19 @@ def sharpe_ratio(returns, rrr = 0):
         return 0
     return num/den
 
-def calc_returns(filtered_df, col = 'close'):
+def calc_returns(filtered_df, col = 'close', return_df = False):
     '''
 
     :param filtered_df:
     :param col:
     :return:
     '''
-    filtered_df = filtered_df[['close', 'open', 'high', 'low']]
-    filtered_df = filtered_df.pct_change()
-    selected = filtered_df[col].tolist()
+    df = filtered_df[['close', 'open', 'high', 'low']]
+    df = df.pct_change()
+    if return_df:
+        filtered_df[col + '_pct_change'] = df[col]
+        return filtered_df
+    selected = df[col].tolist()
     returns_list= []
     for x in range(1, len(selected), 2):
         returns_list.append(selected[x])
@@ -272,12 +275,12 @@ def cumulative_returns(returns_list, output = True):
 
     return(trade_sum)
 
-def get_returns(df, sig = 'signal', duplicates = False): # more complete implementation
+def get_returns(df, sig = 'signal', duplicates = False, return_df = False): # more complete implementation
     df = filter_signals(df, col = sig)
     #print(df.head())
     if duplicates:
         df = remove_duplicates(df, 'signal')
-    return(calc_returns(df))
+    return(calc_returns(df, return_df = return_df))
 
 
 
