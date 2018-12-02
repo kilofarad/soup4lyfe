@@ -204,16 +204,16 @@ class ti_test():
 
     def test16(self):
         print('TEST 16 - Create RSI Bound Crossover Dataframe')
-        #try:
-        df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
-        df = ti.create_bound_crossover_df(df, 'rsi_14', 'close_5_ema')
-        df = ti.filter_signals(df)
-        df = ti.remove_duplicates(df, 'signal')
-        print(df.head())
-        returns_list = ti.calc_returns(df)
-        cumulative_returns = ti.cumulative_returns(returns_list)
-        #except Exception as e:
-            #print(e)
+        try:
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+            df = ti.create_bound_crossover_df(df, 'rsi_14', 'close_5_ema')
+            df = ti.filter_signals(df)
+            df = ti.remove_duplicates(df, 'signal')
+            print(df.head())
+            returns_list = ti.calc_returns(df)
+            cumulative_returns = ti.cumulative_returns(returns_list)
+        except Exception as e:
+            print(e)
 
 
 

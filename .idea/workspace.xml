@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7ad94e1d-772b-4993-83c8-2eb10637c4dd" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/gcl.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gcl_test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/s.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/technicalIndicators.py" beforeDir="false" afterPath="$PROJECT_DIR$/technicalIndicators.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/technicalIndicators_unittest.py" beforeDir="false" afterPath="$PROJECT_DIR$/technicalIndicators_unittest.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,12 +37,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="6022" />
+          <entry key="py" value="6024" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="6022" />
+          <entry key="Python" value="6024" />
         </counts>
       </usages-collector>
     </session>
@@ -64,11 +66,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/technicalIndicators_unittest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="381">
-              <caret line="210" column="46" selection-start-line="210" selection-start-column="46" selection-end-line="210" selection-end-column="46" />
+            <state relative-caret-position="456">
+              <caret line="215" column="20" lean-forward="true" selection-start-line="215" selection-start-column="20" selection-end-line="215" selection-end-column="20" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
-                <marker date="1543720023779" expanded="true" signature="156:161" ph="..." />
+                <marker date="1543721039045" expanded="true" signature="156:161" ph="..." />
               </folding>
             </state>
           </provider>
@@ -255,11 +257,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/technicalIndicators_unittest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="381">
-          <caret line="210" column="46" selection-start-line="210" selection-start-column="46" selection-end-line="210" selection-end-column="46" />
+        <state relative-caret-position="456">
+          <caret line="215" column="20" lean-forward="true" selection-start-line="215" selection-start-column="20" selection-end-line="215" selection-end-column="20" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
-            <marker date="1543720023779" expanded="true" signature="156:161" ph="..." />
+            <marker date="1543721039045" expanded="true" signature="156:161" ph="..." />
           </folding>
         </state>
       </provider>
