@@ -272,5 +272,13 @@ def cumulative_returns(returns_list, output = True):
 
     return(trade_sum)
 
+def get_returns(df, sig = 'signal', duplicates = False): # more complete implementation
+    df = filter_signals(df, col = sig)
+    #print(df.head())
+    if duplicates:
+        df = remove_duplicates(df, 'signal')
+    return(calc_returns(df))
+
+
 
 
