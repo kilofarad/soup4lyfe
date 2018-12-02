@@ -249,6 +249,7 @@ class ti_test():
             print('OPTIM: {}'.format(optim))
             print('SHARPE RATIO: {}'.format(sr))
             print('MAX: {}'.format(max))
+            return(optim, sr, max)
 
 
         except Exception as e:
