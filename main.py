@@ -14,29 +14,65 @@ import json
 
 
 # READ IN DATA
+symbol = 'BTC'
+comparison_symbol = 'USD'
+default_date = '2018-11-27'
+
 tickers = ['BTC', 'ETH', 'DASH']
+df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
 
 x = tiu.ti_test()
 
 # HIT TYPES
 
-hit_select = Select(title="Client:", value="Dash", options=tickers)
+hit_select = Select(title="Client:", value="BTC", options=tickers)
 hit_date = DateRangeSlider(title="Date Range: ", start=date(2018, 1, 1), end=date.today(),
                            value=(date(2018, 8, 1), date(2018, 9, 1)), step=1)
 hit_input = TextInput(value="", title="Comment:")
 
 hit_inputs = column(hit_select, hit_date, hit_input)
 
-div1 = Div(text="<b>RSI Optimal Parameters (RSI Rolling Windows, Moving Average Windows)</b>: {}".format(x.test17()[0]),
-width=200, height=100)
+# RSI
+brute_results_rsi = ti.brute_force_opt(df, 'rsi', 3, 50, 3, 50, 40, 60, dupe_bool=True)
+rsi = Div(text='''
+                <b>RSI Optimal Parameters</b>: {}
+                <br><br>
+                <b>Optimized RSI Cumulative Trade Returns</b>: {}
+                '''.format(brute_results_rsi[0], round(brute_results_rsi[2], 4)),
+            width=400, height=200)
 
-div2 = Div(text="<b>RSI Sharpe Ratio</b>: {}".format(round(x.test17()[1], 4)),
-width=200, height=100)
+# TRIX
+brute_results_trix = ti.brute_force_opt(df, 'trix', 3, 50, 3, 50, 0, 0, dupe_bool=True, ma = True)
+trix = Div(text='''
+                <b>TRIX Optimal Parameters</b>: {}
+                <br><br>
+                <b>Optimized TRIX Cumulative Trade Returns</b>: {}
+                '''.format(brute_results_trix[0], round(brute_results_trix[2], 4)),
+            width=400, height=200)
 
-div3 = Div(text="<b>Optimized RSI Cumulative Trade Returns</b>: {}".format(round(x.test17()[2], 4)),
-width=200, height=100)
+# WR
+brute_results_wr = ti.brute_force_opt(df, 'wr', 3, 50, 3, 50, 50, 50, dupe_bool=True)
+wr = Div(text='''
+                <b>WR Optimal Parameters</b>: {}
+                <br><br>
+                <b>Optimized WR Cumulative Trade Returns</b>: {}
+                '''.format(brute_results_wr[0], round(brute_results_wr[2], 4)),
+            width=400, height=200)
 
-hit_outputs = column(div1, div2, div3)
+# MACD
+results_macd = x.test15()
+macd_df = ti.create_crossover_df(df, 'macd', 'macds')
+macd_df = ti.filter_signals(macd_df)
+returns_list = ti.calc_returns(macd_df)
+macd_returns = ti.cumulative_returns(returns_list)
+macd = Div(text='''
+                <b>MACD Cumulative Trade Returns</b>: {}
+                '''.format(macd_returns),
+            width=400, height=200)
+
+
+
+hit_outputs = column(rsi, trix, wr, macd)
 hits_tab = Panel(child = row(hit_inputs, hit_outputs), title = "REPORT")
 #hits_tab = Panel(child=row(hit_select, hit_input, hit_month, hit_year, hits_hbar, hits_pie), title="HITS")
 

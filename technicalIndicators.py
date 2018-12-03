@@ -9,6 +9,14 @@ from math import pi
 
 from stockstats import StockDataFrame
 
+from bokeh.plotting import figure, show
+from bokeh.io import output_notebook, output_file
+from bokeh.models import HoverTool, ColumnDataSource, LinearAxis, Range1d, Legend, LabelSet, Label, OpenURL, TapTool
+from bokeh.layouts import row
+from bokeh.palettes import Blues8, Category20c
+from bokeh.core.properties import value
+from bokeh.transform import cumsum
+
 
 def daily_price_historical(symbol, comparison_symbol, all_data=True, exchange=''):
     '''
@@ -205,28 +213,28 @@ def sharpe_ratio(returns, rrr = 0):
         return 0
     return num/den
 
-def calc_returns(filtered_df, col = 'close'):
-    '''
-
-    :param filtered_df:
-    :param col:
-    :return:
-    '''
-    filtered_df = filtered_df[['close', 'open', 'high', 'low']]
-    filtered_df = filtered_df.pct_change()
-    selected = filtered_df[col].tolist()
-    returns_list= []
-    for x in range(1, len(selected), 2):
-        returns_list.append(selected[x])
-
-    return(returns_list)
-
 def calc_sharpe(filtered_df, col = 'close'):
     filtered_df = filtered_df[['close', 'open', 'high', 'low']]
     filtered_df = filtered_df.pct_change()
     return(sharpe_ratio(filtered_df[col]))
 
+def calc_returns(filtered_df, col = 'close', return_df = False):
+    '''
+    :param filtered_df:
+    :param col:
+    :return:
+    '''
+    df = filtered_df[['close', 'open', 'high', 'low']]
+    df = df.pct_change()
+    if return_df:
+        filtered_df[col + '_pct_change'] = df[col]
+        return filtered_df
+    selected = df[col].tolist()
+    returns_list= []
+    for x in range(1, len(selected), 2):
+        returns_list.append(selected[x])
 
+    return(returns_list)
 
 def create_crossover_df(df, lin1, lin2):
     col1 = get_col_index(df, lin1)
@@ -239,14 +247,14 @@ def create_crossover_df(df, lin1, lin2):
     df = df.assign(signal=c.values)
     return(df)
 
-def create_bound_crossover_df(df, lin1, n = 5):
+def create_bound_crossover_df(df, lin1, n = 5, low = 40, up = 60):
     col1 = get_col_index(df, lin1)
     df['MA'] = df[lin1].rolling(window=n).mean()
     #col2 = 'MA'
     col2 = get_col_index(df, 'MA')
     c = []
     for x in range(len(df['timestamp'])):
-        c.append(bound_crossover(df, x, col1, col2))
+        c.append(bound_crossover(df, x, col1, col2, lower_bound = low, upper_bound = up))
     c = pd.Series(c)
     df = df[['close', 'open', 'high', 'low', lin1, 'MA']]
     df = df.assign(signal=c.values)
@@ -276,9 +284,37 @@ def get_returns(df, sig = 'signal', duplicates = False): # more complete impleme
     df = filter_signals(df, col = sig)
     #print(df.head())
     if duplicates:
-        df = remove_duplicates(df, 'signal')
-    return(calc_returns(df))
+        df = remove_duplicates(df, sig)
+    return(calc_returns(df), df)
 
+def brute_force_opt(df, indicator, param1_lower, param1_upper, param2_lower, param2_upper, lower, upper,
+                    sig_col = 'signal', dupe_bool = False, ma = False):
+    sub_df = df[['close', 'open', 'high', 'low', 'timestamp']]
+    sub_df = convert2stockstats(sub_df)
+    param1_win = list(range(param1_lower, param1_upper))
+    param2_win = list(range(param2_lower, param2_upper))
+    max = 0
+    for win1 in param1_win:
+        if ma:
+            #print('{}_{}_{}'.format(indicator, win1, 'sma'))
+            #break
+            df = create_indicator_df(sub_df, '{}_{}_{}'.format(indicator, win1, 'sma'))
+        else:
+            df = create_indicator_df(sub_df, '{}_{}'.format(indicator, win1))
+        for win2 in param2_win:
+            if ma:
+                copy_df = create_bound_crossover_df(df, '{}_{}_{}'.format(indicator, win1, 'sma'), win2, lower, upper)
+            else:
+                copy_df = create_bound_crossover_df(df, '{}_{}'.format(indicator, win1), win2, lower, upper)
+            returns_list, filtered_df = get_returns(copy_df, sig = sig_col, duplicates = dupe_bool)
+            total_returns = cumulative_returns(returns_list, output=False)
+            if total_returns > max:
+                optim = (win1, win2)
+                sr = calc_sharpe(copy_df)
+                head = filtered_df.head()
+                max = total_returns
+
+    return(optim, sr, max, head)
 
 
 

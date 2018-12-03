@@ -5,6 +5,7 @@ import pandas as pd
 symbol = 'BTC'
 comparison_symbol = 'USD'
 default_date = '2018-11-27'
+
 class ti_test():
 
     def test1(self):
@@ -22,7 +23,7 @@ class ti_test():
     def test2(self):
         print('TEST 2 - Read in csv as pandas dataframe')
         try:
-            df = pd.read_csv('data/{}-{}.csv'.format(symbol, default_date))
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
             df = ti.convert2stockstats(df)
             print(df.head())
         except Exception as e:
@@ -31,7 +32,7 @@ class ti_test():
     def test3(self):
         print('TEST 3 - Add Default MACD')
         try:
-            df = pd.read_csv('data/{}-{}.csv'.format(symbol, default_date))
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
             df = ti.convert2stockstats(df)
             df = ti.create_indicator_df(df, 'macd')
             print(df.head())
@@ -199,6 +200,7 @@ class ti_test():
             print(df.head())
             returns_list = ti.calc_returns(df)
             cumulative_returns = ti.cumulative_returns(returns_list)
+            return(cumulative_returns)
         except Exception as e:
             print(e)
 
@@ -255,6 +257,52 @@ class ti_test():
         except Exception as e:
             print('ERROR: {}'.format(e))
 
+    def test18(self):
+        print('TEST 18 - Brute Force Streamline - RSI')
+        try:
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+            brute_results = ti.brute_force_opt(df, 'rsi', 23, 24, 3, 4, 40, 60, dupe_bool = True)
+            print('OPTIM: {}'.format(brute_results[0]))
+            print('SHARPE RATIO: {}'.format(brute_results[1]))
+            print('CUMULATIVE RETURNS: {}'.format(brute_results[2]))
+            print('HEAD:\n {}'.format(brute_results[3]))
+        except Exception as e:
+            print('ERROR: {}'.format(e))
+
+    def test19(self):
+        print('TEST 19 - Brute Force Streamline - WR')
+        try:
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+            brute_results = ti.brute_force_opt(df, 'wr', 3, 50, 3, 50, 50, 50, dupe_bool=True)
+            print('OPTIM: {}'.format(brute_results[0]))
+            print('SHARPE RATIO: {}'.format(brute_results[1]))
+            print('CUMULATIVE RETURNS: {}'.format(brute_results[2]))
+            print('HEAD:\n {}'.format(brute_results[3]))
+        except Exception as e:
+            print('ERROR: {}'.format(e))
+
+    def test20(self):
+        print('TEST 20 - Brute Force Streamline - TRIX')
+        try:
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+            brute_results = ti.brute_force_opt(df, 'trix', 3, 50, 3, 50, 0, 0, dupe_bool=True, ma = True)
+            print('OPTIM: {}'.format(brute_results[0]))
+            print('SHARPE RATIO: {}'.format(brute_results[1]))
+            print('CUMULATIVE RETURNS: {}'.format(brute_results[2]))
+            print('HEAD:\n {}'.format(brute_results[3]))
+        except Exception as e:
+            print('ERROR: {}'.format(e))
+
+    def test21(self):
+        print('TEST 21 - Create TRIX Column')
+        try:
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+            df = ti.convert2stockstats(df)
+            df = ti.create_indicator_df(df, 'trix_10_sma')
+            print(df.head())
+        except Exception as e:
+            print(e)
+
 
 
 if __name__ == '__main__':
@@ -271,12 +319,15 @@ if __name__ == '__main__':
     #x.test10()
     #x.test11()
     #x.test12()
-    #x.test13()
-    #x.test14()
+    x.test13()
+    x.test14()
     #x.test15()
     #x.test16()
-    x.test17()
-    #x.test18()
+    #x.test17()
+    x.test18()
+    x.test19()
+    x.test20()
+    #x.test21()
 
     print('TESTS COMPLETE!')
 
