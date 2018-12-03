@@ -212,17 +212,10 @@ def sharpe_ratio(returns, rrr = 0):
     if den == 0:
         return 0
     return num/den
-
-<<<<<<< HEAD
 def calc_sharpe(filtered_df, col = 'close'):
     filtered_df = filtered_df[['close', 'open', 'high', 'low']]
     filtered_df = filtered_df.pct_change()
     return(sharpe_ratio(filtered_df[col]))
-=======
-def calc_returns(filtered_df, col = 'close', return_df = False):
-    '''
->>>>>>> bcebf9b56f179c9bbf69dc721c74413f1d115f53
-
 def calc_returns(filtered_df, col = 'close', return_df = False):
     '''
     :param filtered_df:
@@ -289,7 +282,6 @@ def get_returns(df, sig = 'signal', duplicates = False, return_df = False): # mo
     df = filter_signals(df, col = sig)
     #print(df.head())
     if duplicates:
-<<<<<<< HEAD
         df = remove_duplicates(df, sig)
     return(calc_returns(df), df)
 
@@ -321,11 +313,9 @@ def brute_force_opt(df, indicator, param1_lower, param1_upper, param2_lower, par
                 max = total_returns
 
     return(optim, sr, max, head)
-=======
-        df = remove_duplicates(df, 'signal')
-    return(calc_returns(df, return_df = return_df))
 
->>>>>>> bcebf9b56f179c9bbf69dc721c74413f1d115f53
+
+
 
 
 
