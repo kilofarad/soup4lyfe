@@ -155,7 +155,7 @@ p = tv.plot_multiple_spreads(frames, ['RSI', 'TRIX', 'WR'], colors)
 technical_outputs1 = column(p, rsi_p)
 technical_outputs2 = column(trix_p, wr_p)
 technical_inputs = column(client_select, rsi, trix, wr, explanation)
-technical_tab = Panel(child = row(technical_inputs, technical_outputs1, technical_outputs2), title = "TECHNICAL INDCATORS")
+technical_tab = Panel(child = row(technical_inputs, technical_outputs1, technical_outputs2), title = "TECHNICAL INDICATORS")
 
 #these three lines are our navbar,
 style_str = 'width: 180px; height: 50px; line-height: 50px; display: inline-block; text-decoration: none; text-align: center; padding: 0; margin: 0;'
