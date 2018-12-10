@@ -15,23 +15,22 @@ import json
 
 
 # READ IN DATA
+# We are focusing on BTC data
 symbol = 'BTC'
 comparison_symbol = 'USD'
 default_date = '2018-11-27'
 
 tickers = ['BTC']
-df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date)) # Working with csv with data from CryptoCompare, derived using CryptoCompare API
 
-x = tiu.ti_test()
+x = tiu.ti_test() # For running unit tests, if desired
 
-# HIT TYPES
+# TRADING
 
-client_select = Select(title="Client:", value="BTC", options=tickers)
-#hit_date = DateRangeSlider(title="Date Range: ", start=date(2018, 1, 1), end=date.today(),
- #                          value=(date(2018, 8, 1), date(2018, 9, 1)), step=1)
-#hit_input = TextInput(value="", title="Comment:")
+client_select = Select(title="Client:", value="BTC", options=tickers) # Can add other tickers here later
 
 
+# Explanation of trading
 explanation = Div(text = '''
                         <b>General Explanation of Crossover Trading with Moving Averages</b><br>
                         <em>For each indicator featured here...</em>
@@ -55,6 +54,8 @@ explanation = Div(text = '''
                          ''', width = 400, height = 375)
 # RSI
 brute_results_rsi = ti.brute_force_opt(df, 'rsi', 23, 24, 3, 4, 40, 60, dupe_bool=True)
+# For purposes of demonstration, we are limiting the brute force windows to (23,3)
+# We have already run the optimization to determine these numbers, but the brute force can take a few minutes to run
 rsi = Div(text='''
                 <b>Optimized Relative Strength Index</b>
                 <br>
@@ -69,7 +70,7 @@ rsi = Div(text='''
 mask_rsi = (brute_results_rsi[3]['signal'] == 'Sell')
 rsi_df = brute_results_rsi[3].loc[mask_rsi]
 
-
+# Create RSI Indicator Plot
 rsi_src = brute_results_rsi[4]
 rsi_src['timestamp'] = pd.to_datetime(rsi_src['timestamp'])
 rsi_src = ColumnDataSource(rsi_src)
@@ -83,12 +84,11 @@ rsi_p.legend.location = "top_right"
 rsi_p.legend.click_policy = "mute"
 rsi_p.yaxis.axis_label = "RSI"
 rsi_p.xaxis.axis_label = "Date"
-#print(rsi_ma_df.head())
-#rsi_df['color'] = 'white'
-#rsi_p = tv.plot_crypto_spread(rsi_df)
 
 # TRIX
 brute_results_trix = ti.brute_force_opt(df, 'trix', 12, 13, 3, 4, 0, 0, dupe_bool=True, ma = True)
+# For purposes of demonstration, we are limiting the brute force windows to (12,3)
+# We have already run the optimization to determine these numbers, but the brute force can take a few minutes to run
 trix = Div(text='''
                 <b>Optimized TRIX</b>
                 <br>
@@ -101,6 +101,7 @@ trix = Div(text='''
 mask_trix = (brute_results_trix[3]['signal'] == 'Sell')
 trix_df = brute_results_trix[3].loc[mask_trix]
 
+# Create TRIX Plot
 trix_src = brute_results_trix[4]
 trix_src['timestamp'] = pd.to_datetime(trix_src['timestamp'])
 trix_src = ColumnDataSource(trix_src)
@@ -113,13 +114,13 @@ trix_p.legend.location = "top_right"
 trix_p.legend.click_policy = "mute"
 trix_p.yaxis.axis_label = "TRIX"
 trix_p.xaxis.axis_label = "Date"
-#trix_df['color'] = '#46A0C7'
-#trix_p = tv.plot_crypto_spread(trix_df)
 
 
 
 #WR
 brute_results_wr = ti.brute_force_opt(df, 'wr', 29, 30, 5, 6, 50, 50, dupe_bool=True)
+# For purposes of demonstration, we are limiting the brute force windows to (29,5)
+# We have already run the optimization to determine these numbers, but the brute force can take a few minutes to run
 wr = Div(text='''
                 <b>Williams Percentage R</b><br>
                 Optimal Windows for (WR Moving Avg, Simple Moving Avg): {}
@@ -130,6 +131,7 @@ wr = Div(text='''
 mask_wr = (brute_results_wr[3]['signal'] == 'Sell')
 wr_df = brute_results_wr[3].loc[mask_wr]
 
+# CREATE WR Plot
 wr_src = brute_results_wr[4]
 wr_src['timestamp'] = pd.to_datetime(wr_src['timestamp'])
 wr_src = ColumnDataSource(wr_src)
@@ -142,29 +144,22 @@ wr_p.legend.location = "top_right"
 wr_p.legend.click_policy = "mute"
 wr_p.yaxis.axis_label = "WPR"
 wr_p.xaxis.axis_label = "Date"
-#wr_df['color'] = '#0C194D'
-#wr_p = tv.plot_crypto_spread(wr_df)
 
 frames = [rsi_df, trix_df, wr_df]
 colors = ['white','#46A0C7','#0C194D']
-#indicator_df = pd.concat(frames)
-
-
 
 p = tv.plot_multiple_spreads(frames, ['RSI', 'TRIX', 'WR'], colors)
 
 
-#hit_outputs = column(p, rsi, trix, wr, macd)
+# Put dashboard together!
 technical_outputs1 = column(p, rsi_p)
 technical_outputs2 = column(trix_p, wr_p)
 technical_inputs = column(client_select, rsi, trix, wr, explanation)
 technical_tab = Panel(child = row(technical_inputs, technical_outputs1, technical_outputs2), title = "TECHNICAL INDCATORS")
-#hits_tab = Panel(child=row(hit_select, hit_input, hit_month, hit_year, hits_hbar, hits_pie), title="HITS")
 
 
 
 tabs = Tabs(tabs = [technical_tab])
 
 curdoc().add_root(tabs)
-#curdoc().add_root(row(hits_hbar, hits_pie))
 curdoc().title = "Trade Strat"

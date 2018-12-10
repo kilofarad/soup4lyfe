@@ -18,11 +18,11 @@ import technicalIndicators as ti
 def plot_crypto_spread(indicator_df, title = 'Optimized Returns Scatterplot'):
     '''
 
-    :param src: ColumnDataSource object of Vader-processed CryptoCompare News
+    :param src: pandas dataframe with indicator information
     :param title: name of plot
-    :return: Bokeh figure of scatter plot of CryptoCompare-tracked hits
+    :return: Bokeh figure of scatter plot of returns
 
-    Generate spread of Crypto News
+    Generate spread of indicator returns
     '''
     #print(indicator_df.head())
     indicator_df['timestamp'] = pd.to_datetime(indicator_df['timestamp'])
@@ -65,6 +65,17 @@ def plot_crypto_spread(indicator_df, title = 'Optimized Returns Scatterplot'):
     return(p)
 
 def plot_multiple_spreads(sources, names, colors, title = 'Optimized Returns Scatterplot'):
+    '''
+
+    :param sources: list of pandas dataframes with indicator return info
+    :param names: list of str names of each associated indicator in sources
+    :param colors: list of str hex codes of colors to use
+    :param title: str name
+    :return: Bokeh scatterplot containing overlaid return data
+
+    NOTE: Sources, names, and colors must be of the same length as they are being zipped together
+    
+    '''
     hover = HoverTool(  # Add annotations on hover
         tooltips='''
                 <div>
@@ -89,7 +100,7 @@ def plot_multiple_spreads(sources, names, colors, title = 'Optimized Returns Sca
         mode='vline'
     )
     p = figure(x_axis_type='datetime', title=title)
-    for df, name, color in zip(sources, names, colors):
+    for df, name, color in zip(sources, names, colors): # Sources, names, colors need to be same length for successful zip
         #df = pd.DataFrame(data)
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         src = ColumnDataSource(df)
