@@ -259,15 +259,15 @@ class ti_test():
 
     def test18(self):
         print('TEST 18 - Brute Force Streamline - RSI')
-        try:
-            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
-            brute_results = ti.brute_force_opt(df, 'rsi', 23, 24, 3, 4, 40, 60, dupe_bool = True)
-            print('OPTIM: {}'.format(brute_results[0]))
-            print('SHARPE RATIO: {}'.format(brute_results[1]))
-            print('CUMULATIVE RETURNS: {}'.format(brute_results[2]))
-            print('HEAD:\n {}'.format(brute_results[3]))
-        except Exception as e:
-            print('ERROR: {}'.format(e))
+        #try:
+        df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+        brute_results = ti.brute_force_opt(df, 'rsi', 23, 24, 3, 4, 40, 60, dupe_bool = True)
+        print('OPTIM: {}'.format(brute_results[0]))
+        print('SHARPE RATIO: {}'.format(brute_results[1]))
+        print('CUMULATIVE RETURNS: {}'.format(brute_results[2]))
+        print('HEAD:\n {}'.format(brute_results[3]))
+        #except Exception as e:
+            #print('ERROR: {}'.format(e))
 
     def test19(self):
         print('TEST 19 - Brute Force Streamline - WR')
@@ -303,6 +303,26 @@ class ti_test():
         except Exception as e:
             print(e)
 
+    def test22(self):
+        print('TEST 22 - Timestamp Returns DF')
+        try:
+            df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+            brute_results = ti.brute_force_opt(df, 'trix', 3, 50, 3, 50, 0, 0, dupe_bool=True, ma=True)
+            print('OPTIM: {}'.format(brute_results[0]))
+            print('SHARPE RATIO: {}'.format(brute_results[1]))
+            print('CUMULATIVE RETURNS: {}'.format(brute_results[2]))
+            print('HEAD:\n {}'.format(brute_results[3]))
+        except Exception as e:
+            print(e)
+
+    def test23(self):
+        print('TEST 23 - COMBINE ALL RETURNS DF')
+        df = pd.read_csv('data/{}/{}-{}.csv'.format(symbol, symbol, default_date))
+        trix_df = ti.brute_force_opt(df, 'trix', 3, 50, 3, 50, 0, 0, dupe_bool=True, ma=True)[3]
+        wr_df = ti.brute_force_opt(df, 'wr', 3, 50, 3, 50, 50, 50, dupe_bool=True)[3]
+        rsi_df = ti.brute_force_opt(df, 'rsi', 23, 24, 3, 4, 40, 60, dupe_bool=True)[3]
+
+
 
 
 if __name__ == '__main__':
@@ -319,7 +339,7 @@ if __name__ == '__main__':
     #x.test10()
     #x.test11()
     #x.test12()
-    x.test13()
+    #x.test13()
     x.test14()
     #x.test15()
     #x.test16()
@@ -328,6 +348,7 @@ if __name__ == '__main__':
     x.test19()
     x.test20()
     #x.test21()
+    #x.test22()
 
     print('TESTS COMPLETE!')
 
