@@ -62,7 +62,7 @@ source = ColumnDataSource(cleaned_up)
 
 # define titles, columns, and scatter vs line for our plots
 titles = [ 'Daily Open/Close BTC-USD Prices',
-            'Volume (USD)',
+            'Trading Volume',
             'Daily High/Low BTC-USD Prices',
             'Body Sentiment Analysis',
             'Title Sentiment Analysis',
@@ -82,7 +82,7 @@ cols_to_plot = [ ['open', 'close'],
             [tech + '_cumulative_returns' for tech in tech_strs]]
 
 legend_labels = [ ['open', 'close'],
-                ['volumeto'],
+                ['volume (usd)'],
                 ['high', 'low'],
                 ['positive', 'negative', 'neutral', 'compound'],
                 ['positive', 'negative', 'neutral', 'compound'] ,
@@ -113,9 +113,9 @@ for cols, title, scatter, legend_lab in zip(cols_to_plot, titles, scatter, legen
     colors = Spectral11[0:len(cols)]
     for index, col in enumerate(cols):
         if scatter:
-            plot.scatter('timestamp', col, source=source, color = colors[index], legend = str(legend_lab).title().replace('_', ' '))
+            plot.scatter('timestamp', col, source=source, color = colors[index], legend = str(legend_lab[index]).title().replace('_', ' '))
         else:
-            plot.line('timestamp', col, source=source, color = colors[index], legend = str(legend_lab).title().replace('_', ' '), line_width=3, line_alpha=0.6)
+            plot.line('timestamp', col, source=source, color = colors[index], legend = str(legend_lab[index]).title().replace('_', ' '), line_width=3, line_alpha=0.6)
         #that sweet, sweet click to hide series in the legend
         plot.legend.click_policy="hide"
     plots.append(plot)

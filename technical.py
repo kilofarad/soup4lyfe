@@ -48,9 +48,9 @@ explanation = Div(text = '''
                         TRIX = Difference between the previous and current moving average values</em>
                         <br><br>
                         <em>WPR = (highest high – closing price) / (highest high – lowest low) * -100</em>
-                        
-                        
-                        
+
+
+
                          ''', width = 400, height = 375)
 # RSI
 brute_results_rsi = ti.brute_force_opt(df, 'rsi', 23, 24, 3, 4, 40, 60, dupe_bool=True)
@@ -63,7 +63,7 @@ rsi = Div(text='''
                 <br>
                 Optimized RSI Cumulative Trade Returns: {}%
                 <br><br>
-               
+
                 '''.format(brute_results_rsi[0], round(brute_results_rsi[2]*100, 2)),
             width=400, height=70)
 
@@ -157,9 +157,13 @@ technical_outputs2 = column(trix_p, wr_p)
 technical_inputs = column(client_select, rsi, trix, wr, explanation)
 technical_tab = Panel(child = row(technical_inputs, technical_outputs1, technical_outputs2), title = "TECHNICAL INDCATORS")
 
+#these three lines are our navbar,
+style_str = 'width: 180px; height: 50px; line-height: 50px; display: inline-block; text-decoration: none; text-align: center; padding: 0; margin: 0;'
+div_str = '<a style="%s" href="/technical">Technical Returns</a><a style="%s" href="/viz">ML & Other Indicators</a>' % (style_str, style_str)
+navbar = Div(text=div_str, width = 400, height = 50)
 
-
+#tabs
 tabs = Tabs(tabs = [technical_tab])
 
-curdoc().add_root(tabs)
+curdoc().add_root( column(navbar, tabs) )
 curdoc().title = "Trade Strat"
