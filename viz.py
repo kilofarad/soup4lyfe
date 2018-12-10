@@ -1,12 +1,3 @@
-''' Present an interactive function explorer with slider widgets.
-Scrub the sliders to change the properties of the ``sin`` curve, or
-type into the title text box to update the title of the plot.
-Use the ``bokeh serve`` command to run the example by executing:
-    bokeh serve sliders.py
-at your command prompt. Then navigate to the URL
-    http://localhost:5006/sliders
-in your browser.
-'''
 import numpy as np
 import pandas as pd
 import scikit as sk
@@ -36,18 +27,32 @@ model_strs = ['random_forest', 'extra_trees', 'svc', 'mlp', 'dummy']
 for model, model_str in zip(models, model_strs):
     df[model_str + '_returns'] = sk.test_returns(X, ret, df, model)
 
+tech_strs = ['rsi', 'trix', 'wr']
+other_args = [(23, 24, 3, 4, 40, 60), (12, 13, 3, 4, 0, 0), (29, 30, 5, 6, 50, 50)]
+for tech_str, other_arg in zip(tech_strs, other_args):
+    brute_results = ti.brute_force_opt(df, tech_str, *other_arg, dupe_bool = True, ma = True if tech_str == 'trix' else False)
+    mask = (brute_results[3]['signal'] == 'Sell')
+    full_df = brute_results[3].loc[mask]
+    full_df = full_df[['timestamp', 'close_pct_change']]
+    full_df.columns = ['timestamp', tech_str + '_returns']
+    df = df.merge(full_df, how = 'left', on = 'timestamp')
 #transfer desired columns into a cleaned-up dataframe for our source
 cleaned_up = pd.DataFrame()
-titles = [ 'Daily Open/Close Prices', 'Volume', 'Daily High/Low Prices', 'Body Sentiment Analysis', 'Title Sentiment Analysis', 'Modelled Strategy Daily Returns', 'Modelled Strategy Cumulative Returns' ]
-to_plot = [ ['open', 'close'], ['volumeto'], ['high', 'low'], ['bdy_sent_pos', 'bdy_sent_neg', 'bdy_sent_neu', 'bdy_sent_compound'], ['title_sent_pos', 'title_sent_neg', 'title_sent_neu', 'title_sent_compound'] , [model + '_returns' for model in model_strs], [model + '_cum_returns' for model in model_strs] ]
-scatter = [ False, False, False, False, False, True, False ]
 for col in X.columns:
     cleaned_up[col] = X[col]
 for model_col in model_strs:
     cleaned_up[model_col + '_returns'] = df[model_col + '_returns'].replace(np.nan, 0)
-    cleaned_up[model_col + '_cum_returns'] = np.cumsum(cleaned_up[ model_col + '_returns' ])
+    cleaned_up[model_col + '_cumulative_returns'] = np.cumsum(cleaned_up[ model_col + '_returns' ])
+for tech_str in tech_strs:
+    cleaned_up[tech_str + '_returns'] = df[tech_str + '_returns']
+    cleaned_up[tech_str + '_cumulative_returns'] = np.cumsum(cleaned_up[ tech_str + '_returns' ].replace(np.nan, 0))
 cleaned_up['timestamp'] = pd.to_datetime(df.timestamp)
 source = ColumnDataSource(cleaned_up)
+
+# define important info for our plots
+titles = [ 'Daily Open/Close Prices', 'Volume', 'Daily High/Low Prices', 'Body Sentiment Analysis', 'Title Sentiment Analysis', 'Modelled Strategy Daily Returns', 'Modelled Strategy Cumulative Returns', 'Technical Indicator Returns', 'Technical Indicator Cumulative Returns' ]
+to_plot = [ ['open', 'close'], ['volumeto'], ['high', 'low'], ['bdy_sent_pos', 'bdy_sent_neg', 'bdy_sent_neu', 'bdy_sent_compound'], ['title_sent_pos', 'title_sent_neg', 'title_sent_neu', 'title_sent_compound'] , [model + '_returns' for model in model_strs], [model + '_cumulative_returns' for model in model_strs] , [tech + '_returns' for tech in tech_strs], [tech + '_cumulative_returns' for tech in tech_strs]]
+scatter = [ False, False, False, False, False, True, False, True, False ]
 
 plots = []
 # Set up plot
