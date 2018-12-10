@@ -75,7 +75,8 @@ def test_returns(X, ret, df, model, daily = True, bucketing = kat, _mc = 3):
         return df.returns
     else:
         df['signal'] = pred
-        returns = ti.get_returns(df, duplicates = True, return_df = True)
+        from technicalIndicators import get_returns
+        returns = get_returns(df, duplicates = True)[1]
         return returns[ returns.signal == 'Sell']
 
 def sharpe_ratio(y, returns, rrr = 0):
