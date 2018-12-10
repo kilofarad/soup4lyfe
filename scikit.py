@@ -34,6 +34,23 @@ def load_X_returns(csv, X_cols):
 def kat(p_return, hold_cutoff = 0.01, max_classes=3):
     return np.sign(p_return)*max_classes if np.abs(p_return) > hold_cutoff else np.trunc(p_return/hold_cutoff*max_classes) 
 
+def test_returns(X, ret, df, model, daily = True, bucketing = kat, _mc = 3):
+    y_tr, y_pr = model_cross_val_predict(X, ret.apply(bucketing), model = model)
+    pred = [int(p) for p in y_pr.flatten()]
+    if daily:
+        pos, neg, zer = (1, -1, 0)
+    else:
+        pos, neg, zer = ('Sell', 'Buy', 'Hold')
+    pred = [pos if p == _mc else ( neg if p == -1*_mc else zer ) for p in pred]
+    while len(pred) < df.shape[0]:
+        pred.insert(0, 0)
+    if daily:
+        df['returns'] = pd.Series(pred)*ret
+        return df.returns
+    else:
+        df['signal'] = pred
+        returns = ti.get_returns(df, duplicates = True, return_df = True)
+        return returns[ returns.signal == 'Sell']
 
 def sharpe_ratio(y, returns, rrr = 0):
     y = pd.Series(y)
