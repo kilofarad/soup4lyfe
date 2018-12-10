@@ -2,7 +2,8 @@ import requests, datetime
 import pandas as pd
 
 def get_currencies_list():
-    '''Returns a list of supported currencies for our analysis'''
+    '''Returns a list of supported currencies for our analysis:
+    cryptocurrencies for which there is both price data and a news category'''
     url = 'https://min-api.cryptocompare.com/data/all/coinlist'
     response = requests.get(url)
 
@@ -23,7 +24,7 @@ def get_currencies_list():
 def fetchNewsPerCoin(sym, begin = 1517443200, end = None, hard_start = False):
     '''Fetches a dataframe containing news for the given coin between the specified timestamps.
         Note that from and to must be epoch timestamps.
-        Default behavior is to fetch from 2/1/2018 to the present day. 
+        Default behavior is to fetch from 2/1/2018 to the present day.
         If hard_start is True, it will trim off times prior to the begin timestamp'''
     #TODO: implement hard_start
     try:
@@ -34,9 +35,9 @@ def fetchNewsPerCoin(sym, begin = 1517443200, end = None, hard_start = False):
         raise ValueError('fetchNewsPerCoin begin and end parameters should be castable to int')
 
     cols = ['published_on', 'title', 'source', 'body', 'tags']
-    lts = end 
+    lts = end
     df = pd.DataFrame(columns = cols)
- 
+
     while(lts is None or lts > begin):
         ltsString = '&lTs={}'.format(lts) if lts else ''
         url = 'https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories={}&sortOrder=latest'.format(sym) + ltsString
@@ -65,7 +66,7 @@ def fetchNewsPerCoin(sym, begin = 1517443200, end = None, hard_start = False):
             #convert the timestamp into ISO format
             data['published_on'] = pd.to_datetime(data.published_on, unit='s')
             df = df.append(data, sort=True)
-        else: 
+        else:
             raise Exception('Bad API Response Code')
 
     return df

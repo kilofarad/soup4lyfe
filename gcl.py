@@ -5,7 +5,7 @@ import six
 
 
 def analyze_sentiment(content):
-
+    '''Adapted from GCL sample code. Performs a single sentiment analysis cal for a given string.'''
     client = language_v1.LanguageServiceClient()
 
     # content = 'Your text to analyze, e.g. Hello, world!'
@@ -33,11 +33,12 @@ def analyze_sentiment(content):
     except Exception as e:
     # all other exceptions are BAD and unexpected.This is a larger problem than just this loop
         raise e # break the looping and raise to calling function
-    
+
 
 def sentiment_columns(series):
-    '''Takes a pandas series and performs GCL sentiment analysis, returning the columns for sentiment score and magnitude, respectively, in a tuple'''  
-    try: 
+    '''Takes a pandas series of string-like data and performs GCL sentiment analysis,
+    returning the columns for sentiment score and magnitude, respectively, in a tuple'''  
+    try:
         series = series.apply(analyze_sentiment)
         return series.apply(lambda x: x[0]), series.apply(lambda x:x[1])
     except TypeError as e:
