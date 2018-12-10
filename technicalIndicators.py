@@ -67,11 +67,11 @@ def create_indicator_df(df, indicator):
 def create_moving_avg_df(df, col = 'close', short_period = '5', long_period = '50'):
     '''
 
-    :param df:
-    :param col:
-    :param short_period:
-    :param long_period:
-    :return:
+    :param df: pandas dataframe with cryptoasset data
+    :param col: str column to calculate moving average on
+    :param short_period: short moving average window
+    :param long_period: long moving average window
+    :return: pandas dataframe with calculated moving averages
     '''
     short_sma = col + '_' + short_period + '_sma'
     short_ema = col + '_' + short_period + '_ema'
@@ -88,17 +88,25 @@ def create_moving_avg_df(df, col = 'close', short_period = '5', long_period = '5
 
 
 def get_col_index(df, indicator):
+    '''
+
+    :param df: pandas dataframe
+    :param indicator: str name of indicator
+    :return: int index location of indicator in header
+    '''
     cols = list(df)
     return(cols.index(indicator))
 
 def crossover(df, idx, col1, col2):
     '''
 
-    :param df:
-    :param idx:
-    :param col1:
-    :param col2:
-    :return:
+    :param df: pandas dataframe with cryptoasset information
+    :param idx: row index
+    :param col1: str label of first line (e.x. macd line)
+    :param col2: str label of second line (e.x. macds for macd signal line)
+    :return: str either 'buy', 'sell', or 'hold'
+
+    This is used to check for trading signal crossovers between two lines
     '''
     if idx == 0:
         return ("Hold")
@@ -116,6 +124,16 @@ def crossover(df, idx, col1, col2):
         return("Hold")
 
 def bound_crossover(df, idx, col1, col2, lower_bound = 40, upper_bound = 60):
+    '''
+
+    :param df:
+    :param idx:
+    :param col1:
+    :param col2:
+    :param lower_bound:
+    :param upper_bound:
+    :return:
+    '''
     if idx == 0:
         return ("Hold")
 
@@ -324,8 +342,9 @@ def brute_force_opt(df, indicator, param1_lower, param1_upper, param2_lower, par
                 sr = calc_sharpe(copy_df)
                 head = filtered_df
                 max = total_returns
+                orig_df = copy_df
 
-    return(optim, sr, max, head)
+    return(optim, sr, max, head, orig_df)
 
 
 

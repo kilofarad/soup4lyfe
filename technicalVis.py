@@ -15,7 +15,7 @@ import technicalIndicators as ti
 
 
 
-def plot_crypto_spread(indicator_df, title = 'Return Spread'):
+def plot_crypto_spread(indicator_df, title = 'Optimized Returns Scatterplot'):
     '''
 
     :param src: ColumnDataSource object of Vader-processed CryptoCompare News
@@ -64,7 +64,7 @@ def plot_crypto_spread(indicator_df, title = 'Return Spread'):
     p.add_tools(hover)
     return(p)
 
-def plot_multiple_spreads(sources, names, colors, title = 'Return Spread'):
+def plot_multiple_spreads(sources, names, colors, title = 'Optimized Returns Scatterplot'):
     hover = HoverTool(  # Add annotations on hover
         tooltips='''
                 <div>
